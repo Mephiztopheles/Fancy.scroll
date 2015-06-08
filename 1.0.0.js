@@ -640,7 +640,7 @@
         cursorCursor   : 'pointer', // do you want a cursor?
         hideMode       : 'fade' // which mode do you prefer?
     };
-    Fancy.scroll            = true;
+    Fancy.scroll            = VERSION;
     Fancy.api.scroll        = function ( settings ) {
         return this.set ( FancyScroll, settings );
     };
