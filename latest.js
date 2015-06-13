@@ -2,11 +2,11 @@
 
     Fancy.require ( {
         jQuery: false,
-        Fancy : "1.0.0"
+        Fancy : "1.0.1"
     } );
     var i       = 1,
         NAME    = "FancyScroll",
-        VERSION = "1.0.0",
+        VERSION = "1.0.1",
         timer   = 0,
         mouse   = {},
         logged  = false;
@@ -642,7 +642,9 @@
     };
     Fancy.scroll            = VERSION;
     Fancy.api.scroll        = function ( settings ) {
-        return this.set ( FancyScroll, settings );
+        return this.set ( NAME, function ( el ) {
+            return new FancyScroll ( el, settings );
+        } );
     };
 
 }) ( jQuery );
