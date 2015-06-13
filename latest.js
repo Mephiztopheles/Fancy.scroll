@@ -11,21 +11,6 @@
         mouse   = {},
         logged  = false;
 
-    function sp ( el ) {
-        var position            = el.css ( "position" ),
-            excludeStaticParent = position === "absolute",
-            scrollParent        = el.prop ( 'nodeName' ) == "TEXTAREA" && el [ 0 ].scrollHeight - el.outerHeight () > 0 ? el : false;
-        if ( !el )
-            scrollParent = el.parents ().filter ( function () {
-                var parent = $ ( this );
-                if ( excludeStaticParent && parent.css ( "position" ) === "static" ) {
-                    return false;
-                }
-                return ( /(auto|scroll)/ ).test ( parent.css ( "overflow" ) + parent.css ( "overflow-y" ) + parent.css ( "overflow-x" ) ) && parent [ 0 ].scrollHeight - parent.outerHeight () > 0;
-            } ).eq ( 0 );
-        return position === "fixed" || !scrollParent.length ? $ ( el [ 0 ].ownerDocument || document ) : scrollParent;
-    }
-
     /**
      * FancyScroll
      * @param {Object} element
@@ -292,7 +277,7 @@
                     }
                     var closest    = $ ( e.target ).closest ( '.' + SELF.name + '-element' ),
                         up         = delta > 0,
-                        scrollable = sp ( $ ( e.target ) );
+                        scrollable = Fancy.scrollParent ( $ ( e.target ) );
 
                     // if i am prevented and i am body and closest is not this element -> dont scroll
                     if ( SELF.settings.preventDefault && ( closest.length && !closest.is ( SELF.element ) ) ) {
