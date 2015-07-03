@@ -1,0 +1,41 @@
+{
+  "name": "fancy-scroll",
+  "title": "FancyScroll",
+  "description": "JavaScript Scroller-plugin for Fancy",
+  "version": "1.0.1",
+  "main": "fancyscroll.js",
+  "homepage": "http://mephiztopheles.wtf/fancy-scroll",
+  "author": "Markus Ahrweiler",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mephiztopheles/Fancy.scroll.git"
+  },
+  "ignore": [
+    "source",
+    "spec",
+    ".bowerrc",
+    ".gitignore",
+    ".jshintignore",
+    ".jshintrc",
+    "bower.json",
+    "gruntfile.js",
+    "package.json",
+    "README.md"
+  ],
+  "keywords": [
+    "fancyscroll",
+    "scroller",
+    "scrollbar",
+    "javascript",
+    "browser",
+    "library"
+  ],
+  "bugs": {
+    "url": "https://github.com/Mephiztopheles/Fancy.scroll/issues"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "jquery": ">=1.9.1",
+    "fancy": ">= 1.0.1"
+  }
+}
