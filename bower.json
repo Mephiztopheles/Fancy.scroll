@@ -2,7 +2,7 @@
   "name": "fancy-scroll",
   "title": "FancyScroll",
   "description": "JavaScript Scroller-plugin for Fancy",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "main": "fancyscroll.js",
   "homepage": "http://mephiztopheles.wtf/fancy-scroll",
   "author": "Markus Ahrweiler",

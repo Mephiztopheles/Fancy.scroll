@@ -6,7 +6,7 @@
     } );
     var i                = 1,
         NAME             = "FancyScroll",
-        VERSION          = "1.0.2",
+        VERSION          = "1.0.3",
         timer            = 0,
         mouse            = {},
         logged           = false,
@@ -304,6 +304,7 @@
                             return true;
                         }
                     }
+
                     // if i am prevented and closest scrollable element is not this.element and closest scrollable element is not document -> dont scroll
                     /*if( SELF.settings.preventDefault && ( !scrollable.is( SELF.element ) && !scrollable.is( $( document ) ) ) ) {
                         SELF.debug( 'scrollable parent' );
@@ -315,17 +316,26 @@
                             return true;
                         }
                     }*/
-
                     if ( Fancy.mobile ) {
                         // get mobile touch event
                         var currentY = e.touches && e.touches [ 0 ].clientY;
                         up           = currentY >= lastY;
                         if ( up ) {
-                            // SCROLLING UP
-                            SELF.scrollTo( SELF.left, SELF.top - ( currentY - lastY ) );
+                            if ( SELF.top ) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                e.stopImmediatePropagation();
+                                // SCROLLING UP
+                                SELF.scrollTo( SELF.left, SELF.top - ( currentY - lastY ) );
+                            }
                         } else {
-                            // SCROLLING DOWN
-                            SELF.scrollTo( SELF.left, SELF.top + ( lastY - currentY ) );
+                            if ( SELF.top < SELF.element[ 0 ].scrollHeight - SELF.element.outerHeight() ) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                e.stopImmediatePropagation();
+                                // SCROLLING DOWN
+                                SELF.scrollTo( SELF.left, SELF.top + ( lastY - currentY ) );
+                            }
                         }
                         lastY = currentY;
                     } else {
@@ -335,28 +345,25 @@
                                 e.preventDefault();
                                 e.stopPropagation();
                                 e.stopImmediatePropagation();
+                                // SCROLLING UP
+                                SELF.scrollTo( SELF.left, SELF.top - SELF.settings.scrollValue * delta );
                             }
-                            // SCROLLING UP
-                            SELF.scrollTo( SELF.left, SELF.top - SELF.settings.scrollValue * delta );
 
                         } else {
                             if ( SELF.top < SELF.element[ 0 ].scrollHeight - SELF.element.outerHeight() ) {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 e.stopImmediatePropagation();
+                                // SCROLLING DOWN
+                                SELF.scrollTo( SELF.left, SELF.top + SELF.settings.scrollValue * -delta );
                             }
-                            // SCROLLING DOWN
-                            SELF.scrollTo( SELF.left, SELF.top + SELF.settings.scrollValue * -delta );
                         }
                     }
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
                 } else {
                     SELF.scrollEvents();
                 }
             } else {
-                e.stopPropagation();
-                e.stopImmediatePropagation();
+                e.preventDefault();
             }
 
         }

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Fancy.scroll</title>
+        <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="../bower_components/fancy/fancy.min.js"></script>
+        <script src="../fancyscroll.js"></script>
+        <link rel="stylesheet" href="../fancyscroll.css">
+        <style>
+            #wrapper {
+                height   : 600px;
+                position : relative;
+            }
+
+            #template {
+                height : 400px;
+                width  : 200px;
+            }
+
+            ul {
+                list-style : none;
+            }
+
+            #fill {
+                height : 1000px;
+            }
+
+            li {
+                height     : 100px;
+                background : #CECECE;
+            }
+
+            li:nth-child(even) {
+                background : #636363;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="wrapper">
+            <div id="template">
+                <ul>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                </ul>
+            </div>
+            <div id="fill"></div>
+        </div>
+        <script>
+            Fancy( "#template, #wrapper" ).scroll( { debug: true } );
+        </script>
+    </body>
+
+</html>
