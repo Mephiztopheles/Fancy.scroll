@@ -6,7 +6,7 @@
     } );
     var i                = 1,
         NAME             = "FancyScroll",
-        VERSION          = "1.0.3",
+        VERSION          = "1.0.4",
         timer            = 0,
         mouse            = {},
         logged           = false,
@@ -17,7 +17,6 @@
      * @param {Object} element
      * @param {Object} settings
      */
-
     function FancyScroll( element, settings ) {
         var el = $( element ) [ 0 ].nodeName == "#document" ? $( 'body' ) : $( element );
 
@@ -402,6 +401,8 @@
         // cursor grab event
         SELF.y.cursor.on( 'mousedown.' + SELF.name, function ( e ) {
             "use strict";
+            e.preventDefault();
+            e.stopPropagation();
             mouse                 = {};
             mouse.start           = e.clientY;
             mouse.old             = e.clientY;
@@ -496,7 +497,13 @@
         } );
         return this;
     };
-    FancyScroll.api.scrollTo         = function ( x, y, speed ) {
+    /**
+     * scrolling to x-position
+     * @param {Number} [x]
+     * @param {Number} [y]
+     * @returns {FancyScroll.api}
+     */
+    FancyScroll.api.scrollTo         = function ( x, y ) {
         var SELF = this;
         if ( x < 0 ) {
             x = 0;
