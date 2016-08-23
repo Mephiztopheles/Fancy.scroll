@@ -397,6 +397,11 @@
             SELF.y.removeClass( 'hovered' );
             SELF.y.cursor.active = false;
         } );
+        SELF.y.on( "click." + SELF.name, function ( e ) {
+            // coming soon
+            e.preventDefault();
+            e.stopPropagation();
+        } );
 
         // cursor grab event
         SELF.y.cursor.on( 'mousedown.' + SELF.name, function ( e ) {
