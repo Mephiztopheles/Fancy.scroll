@@ -6,7 +6,7 @@
     } );
     var i                = 1,
         NAME             = "FancyScroll",
-        VERSION          = "1.0.4",
+        VERSION          = "1.1.0",
         timer            = 0,
         mouse            = {},
         logged           = false,
