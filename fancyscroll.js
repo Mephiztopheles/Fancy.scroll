@@ -315,7 +315,7 @@
                             return true;
                         }
                     }*/
-                    if ( Fancy.mobile ) {
+                    if ( e.type == "touchmove" ) {
                         // get mobile touch event
                         var currentY = e.touches && e.touches [ 0 ].clientY;
                         up           = currentY >= lastY;
@@ -397,10 +397,15 @@
             SELF.y.removeClass( 'hovered' );
             SELF.y.cursor.active = false;
         } );
+
         SELF.y.on( "click." + SELF.name, function ( e ) {
-            // coming soon
             e.preventDefault();
             e.stopPropagation();
+            // coming soon
+            if ( e.target == SELF.y[ 0 ] ) {
+                // (offset - half cursor) * 100 / height
+                SELF.scrollTo( SELF.left, (SELF.element[ 0 ].scrollHeight * Math.min( 100, Math.max( 0, (e.offsetY - SELF.y.cursor.height() / 2) * 100 / (SELF.y.height()) ) ) / 100) );
+            }
         } );
 
         // cursor grab event
@@ -508,7 +513,7 @@
      * @param {Number} [y]
      * @returns {FancyScroll.api}
      */
-    FancyScroll.api.scrollTo         = function ( x, y ) {
+    FancyScroll.api.scrollTo = function ( x, y ) {
         var SELF = this;
         if ( x < 0 ) {
             x = 0;
@@ -567,17 +572,17 @@
         SELF.showCursor();
         return SELF;
     };
-    FancyScroll.api.moveCursor       = function () {
+    FancyScroll.api.moveCursor   = function () {
         var SELF = this;
 
         function move( type ) {
 
             var rx = ( SELF.y.height() - SELF.y.cursor.outerWidth() ) / SELF.element.wtsX,
-                ry = ( SELF.y.height() - SELF.y.cursor.outerHeight() ) / SELF.element.wtsY,
+                ry = ( SELF.y.height() - SELF.y.cursor.outerHeight() ) / SELF.element.wtsY/*,
                 sx = ( SELF.left ) * rx,
                 sy = ( SELF.top ) * ry,
                 x  = ( SELF.scrollDirection == 'up' ? Math.max( 0, sx ) : Math.min( SELF.x.wts, sx ) ),
-                y  = ( SELF.scrollDirection == 'up' ? Math.max( 0, sy ) : Math.min( SELF.y.wts, sy ) );
+                y  = ( SELF.scrollDirection == 'up' ? Math.max( 0, sy ) : Math.min( SELF.y.wts, sy ) )*/;
 
             // stop cursor and reposition
             SELF.y.cursor.css( {
@@ -596,20 +601,20 @@
          }*/
         return SELF;
     };
-    FancyScroll.api.delay            = function ( callback, ms ) {
+    FancyScroll.api.delay        = function ( callback, ms ) {
         var SELF = this;
         clearTimeout( timer );
         timer = setTimeout( function () {
             callback.call( SELF );
         }, ms );
     };
-    FancyScroll.api.timeout          = function ( callback, ms ) {
+    FancyScroll.api.timeout      = function ( callback, ms ) {
         var SELF = this;
         setTimeout( function () {
             callback.call( SELF );
         }, ms );
     };
-    FancyScroll.api.scrollEvents     = function () {
+    FancyScroll.api.scrollEvents = function () {
         var SELF = this;
         // function to trigger
         function triggerEvent( type ) {
@@ -647,7 +652,7 @@
         SELF.element.trigger( SELF.name + ':scroll' );
         SELF.element.trigger( SELF.name + ':' + SELF.scrollDirection );
     };
-    FancyScroll.api.debug            = function () {
+    FancyScroll.api.debug        = function () {
         if ( this.settings.debug ) {
             console.log( arguments );
         }
