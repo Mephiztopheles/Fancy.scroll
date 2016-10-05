@@ -6,7 +6,7 @@
     } );
     var i                = 1,
         NAME             = "FancyScroll",
-        VERSION          = "1.1.0",
+        VERSION          = "1.1.1",
         timer            = 0,
         mouse            = {},
         logged           = false,
@@ -259,19 +259,10 @@
         this.x.remove();
     };
     FancyScroll.api.addEventListener = function () {
-        var SELF        = this,
-            scrolltimer = 0,
-            lastY       = 0;
+        var SELF  = this,
+            lastY = 0;
 
         function doScroll( e ) {
-            clearTimeout( SELF.timer [ "scroll" ] );
-            SELF.timer [ "scroll" ] = setTimeout( function () {
-                scrolltimer = false;
-            }, 3 );
-            if ( scrolltimer ) {
-                return;
-            }
-            scrolltimer = true;
             if ( !SELF.disabled ) {
 
                 if ( SELF.settings.mobile ? true : !Fancy.mobile ) {
@@ -284,9 +275,8 @@
                     } else if ( e.detail ) {
                         delta = -e.detail / 3;
                     }
-                    var closest    = $( e.target ).closest( '.' + SELF.name + '-element' ),
-                        up         = delta > 0,
-                        scrollable = Fancy.scrollParent( $( e.target ) );
+                    var closest = $( e.target ).closest( '.' + SELF.name + '-element' ),
+                        up      = delta > 0;
 
                     // if i am prevented and i am body and closest is not this element -> dont scroll
                     if ( SELF.settings.preventDefault && ( closest.length && !closest.is( SELF.element ) ) ) {
@@ -554,22 +544,34 @@
         }
 
         function scrollTop( type ) {
-            SELF [ type ].scrollTop( y );
-            SELF.top = y;
-            // fire scrollevents
-            if ( SELF.direction.y ) {
-                SELF.scrollEvents();
+            if ( SELF.settings.smooth ) {
+                var speed = SELF.settings.scrollValue / SELF[ type ][ 0 ].scrollHeight * 10000;
+                SELF[ type ].stop( true ).animate( { scrollTop: y }, speed, function () {
+                    // move cursor
+                    SELF.moveCursor();
+                    // resize the scroller
+                    SELF.resize();
+                    // and show the cursor
+                    SELF.showCursor();
+                    // fire scrollevents
+                    if ( SELF.direction.y ) {
+                        SELF.scrollEvents();
+                    }
+                } );
+            } else {
+                SELF [ type ].scrollTop( y );
+                // move cursor
+                SELF.moveCursor();
+                // fire scrollevents
+                if ( SELF.direction.y ) {
+                    SELF.scrollEvents();
+                }
             }
+            SELF.top = y;
         }
 
         scrollTop( 'element' );
         scrollLeft( 'element' );
-        // move cursor
-        SELF.moveCursor();
-        // resize the scroller
-        SELF.resize();
-        // and show the cursor
-        SELF.showCursor();
         return SELF;
     };
     FancyScroll.api.moveCursor   = function () {
@@ -578,27 +580,19 @@
         function move( type ) {
 
             var rx = ( SELF.y.height() - SELF.y.cursor.outerWidth() ) / SELF.element.wtsX,
-                ry = ( SELF.y.height() - SELF.y.cursor.outerHeight() ) / SELF.element.wtsY/*,
-                sx = ( SELF.left ) * rx,
-                sy = ( SELF.top ) * ry,
-                x  = ( SELF.scrollDirection == 'up' ? Math.max( 0, sx ) : Math.min( SELF.x.wts, sx ) ),
-                y  = ( SELF.scrollDirection == 'up' ? Math.max( 0, sy ) : Math.min( SELF.y.wts, sy ) )*/;
+                ry = ( SELF.y.height() - SELF.y.cursor.outerHeight() ) / SELF.element.wtsY;
 
             // stop cursor and reposition
             SELF.y.cursor.css( {
-                top: SELF [ type ].scrollTop() * ry
+                top: SELF[ type ].scrollTop() * ry
             } );
             // stop cursor and reposition
             SELF.x.cursor.css( {
-                left: SELF [ type ].scrollLeft() * rx
+                left: SELF[ type ].scrollLeft() * rx
             } );
         }
 
         move( 'element' );
-        /*if ( SELF.isBody && !Fancy.isChrome ) {
-         move( 'wrapper' );
-         } else {
-         }*/
         return SELF;
     };
     FancyScroll.api.delay        = function ( callback, ms ) {
