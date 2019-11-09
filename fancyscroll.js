@@ -1,10 +1,11 @@
-(function ( $ ) {
+( function ( $ ) {
 
     Fancy.require( {
         jQuery: false,
         Fancy : "1.0.2"
     } );
-    var i                = 1,
+
+    let i                = 1,
         NAME             = "FancyScroll",
         VERSION          = "1.1.1",
         timer            = 0,
@@ -12,645 +13,678 @@
         logged           = false,
         MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
 
-    /**
-     * FancyScroll
-     * @param {Object} element
-     * @param {Object} settings
-     */
-    function FancyScroll( element, settings ) {
-        var el = $( element ) [ 0 ].nodeName == "#document" ? $( 'body' ) : $( element );
+    class FancyScroll {
 
-        var SELF      = this;
-        SELF.id       = i;
-        SELF.name     = NAME;
-        SELF.version  = VERSION;
-        SELF.element  = el;
-        SELF.disabled = false;
-        SELF.isBody   = el [ 0 ].nodeName == "#document" || el [ 0 ].nodeName == 'BODY';
-        SELF.wrapper  = el.parent();
-        SELF.timer    = [];
-        i++;
+        /**
+         * FancyScroll
+         * @param {Object} element
+         * @param {Object} settings
+         */
+        constructor( element, settings ) {
 
-        if ( !logged ) {
-            logged = true;
-            Fancy.version( SELF );
-        }
+            const el = $( element ) [ 0 ].nodeName === "#document" ? $( 'body' ) : $( element );
 
-        SELF.settings  = $.extend( {}, Fancy.settings [ NAME ], settings );
-        SELF.direction = {};
+            this.id       = i;
+            this.name     = NAME;
+            this.version  = VERSION;
+            this.element  = el;
+            this.disabled = false;
+            this.isBody   = el [ 0 ].nodeName === "#document" || el [ 0 ].nodeName === 'BODY';
+            this.wrapper  = el.parent();
+            i++;
 
-        SELF.init();
-        SELF.addEventListener();
-        SELF.hideCursor();
-        SELF.resize();
-        SELF.position();
-        return SELF;
-    }
+            if ( !logged ) {
 
-
-    FancyScroll.api = FancyScroll.prototype = {};
-    FancyScroll.api.version          = VERSION;
-    FancyScroll.api.name             = NAME;
-    FancyScroll.api.init             = function () {
-        var SELF      = this;
-        SELF.y        = $( '<div/>', {
-            id   : SELF.name + '-y-' + SELF.id,
-            class: SELF.name + '-rail ' + SELF.name + '-y-rail'
-        } );
-        SELF.y.cursor = $( '<div/>', {
-            id   : SELF.name + '-y-cursor-' + SELF.id,
-            class: SELF.name + '-cursor'
-        } );
-
-        SELF.x        = $( '<div/>', {
-            id   : SELF.name + '-x-' + SELF.id,
-            class: SELF.name + '-rail ' + SELF.name + '-x-rail'
-        } );
-        SELF.x.cursor = $( '<div/>', {
-            id   : SELF.name + '-x-cursor-' + SELF.id,
-            class: SELF.name + '-cursor'
-        } );
-
-        SELF.left = SELF.element.scrollLeft();
-        SELF.top  = SELF.element.scrollTop();
-
-        // add classes and make unscrollable
-        SELF.element.addClass( SELF.name + '-element' );
-        if ( SELF.settings.mobile ? true : !Fancy.mobile ) {
-            SELF.element.css( {
-                overflow: 'hidden'
-            } );
-        } else {
-            SELF.element.css( {
-                overflow: 'auto'
-            } );
-        }
-        if ( SELF.settings.y && SELF.settings.mobile ? true : !Fancy.mobile ) {
-            SELF.y.append( SELF.y.cursor );
-            SELF.wrapper.append( SELF.y );
-        }
-        if ( SELF.settings.x && SELF.settings.mobile ? true : !Fancy.mobile ) {
-            // currently disabled due to uncomplete
-            // SELF.x.append( SELF.x.cursor );
-            // SELF.wrapper.append( SELF.x );
-        }
-
-        SELF.y.cursor.css( {
-            background  : SELF.settings.cursorColor,
-            position    : 'relative',
-            right       : 0,
-            border      : ( SELF.settings.borderColor ? '1px solid ' + SELF.settings.borderColor : '' ),
-            borderRadius: SELF.settings.borderRadius,
-            cursor      : SELF.settings.cursorCursor
-        } ).addClass( SELF.name + '-theme-' + SELF.settings.theme + '-cursor' );
-
-        SELF.x.cursor.css( {
-            background  : SELF.settings.cursorColor,
-            position    : 'relative',
-            top         : 0,
-            border      : ( SELF.settings.borderColor ? '1px solid ' + SELF.settings.borderColor : '' ),
-            borderRadius: SELF.settings.borderRadius,
-            cursor      : SELF.settings.cursorCursor
-        } ).addClass( SELF.name + '-theme-' + SELF.settings.theme + '-cursor' );
-
-        SELF.y.css( {
-            position       : ( SELF.isBody ? 'fixed' : 'absolute' ),
-            backgroundColor: SELF.settings.railColor,
-            width          : SELF.settings.cursorWidth
-        } ).addClass( SELF.name + '-theme-' + SELF.settings.theme + '-rail' );
-        SELF.x.css( {
-            position       : ( SELF.isBody ? 'fixed' : 'absolute' ),
-            backgroundColor: SELF.settings.railColor,
-            width          : SELF.settings.cursorWidth
-        } ).addClass( SELF.name + '-theme-' + SELF.settings.theme + '-rail' );
-
-    };
-    FancyScroll.api.showCursor       = function ( rail ) {
-        // in case it is not disabled and there is a ratio AND if my rails is Y
-        if ( !this.disabled && this.ratioY > 1 && ( !rail || rail == 'y' ) ) {
-            this.y.removeClass( this.name + '-mode-' + this.settings.hideMode + '-out' ).addClass( this.name + '-mode-' + this.settings.hideMode + '-in' );
-
-            // if i am allowed to hide, and i'm not holding the mouse over the rail and i'm not dragged, hide the cursor after 1 min
-            if ( this.settings.autoHide ) {
-                this.delay( function () {
-                    if ( !this.y.cursor.active && !this.y.cursor.dragged ) {
-                        this.hideCursor();
-                    }
-                }, 1000 );
+                logged = true;
+                Fancy.version( this );
             }
+
+            this.settings  = $.extend( {}, Fancy.settings [ NAME ], settings );
+            this.direction = {};
+
+            this.init();
+            this.addEventListener();
+            this.hideCursor();
+            this.resize();
+            this.position();
+
+            return this;
         }
 
-        // in case it is not disabled and there is a ratio AND if my rails is X
-        if ( !this.disabled && this.ratioX > 1 && ( !rail || rail == 'x' ) ) {
-            this.x.removeClass( this.name + '-mode-' + this.settings.hideMode + '-out' ).addClass( this.name + '-mode-' + this.settings.hideMode + '-in' );
+        init() {
 
-            // if i am allowed to hide, and i'm not holding the mouse over the rail and i'm not dragged, hide the cursor after 1 min
-            if ( this.settings.autoHide ) {
-                this.delay( function () {
-                    if ( !this.x.cursor.active && !this.y.cursor.dragged ) {
-                        this.hideCursor();
-                    }
-                }, 1000 );
-            }
-        }
-        return this;
-    };
-    FancyScroll.api.hideCursor       = function () {
-        // check again if i am enabled
-        if ( !this.disabled ) {
-            // remove the animation classes (css)
-            this.y.removeClass( this.name + '-mode-' + this.settings.hideMode + '-in' ).addClass( this.name + '-mode-' + this.settings.hideMode + '-out' );
-            this.x.removeClass( this.name + '-mode-' + this.settings.hideMode + '-in' ).addClass( this.name + '-mode-' + this.settings.hideMode + '-out' );
-        }
-        return this;
-    };
-    FancyScroll.api.disable          = function () {
-        // hide me and disable me
-        this.hideCursor();
-        this.disabled = true;
+            this.y        = $( '<div/>', {
+                id   : this.name + '-y-' + this.id,
+                class: this.name + '-rail ' + this.name + '-y-rail'
+            } );
+            this.y.cursor = $( '<div/>', {
+                id   : this.name + '-y-cursor-' + this.id,
+                class: this.name + '-cursor'
+            } );
 
-        // hide me complete to prevent visibility
-        this.y.hide().removeClass( this.name + '-mode-' + this.settings.hideMode + '-in' ).addClass( this.name + '-mode-' + this.settings.hideMode + '-in' );
-        this.x.hide().removeClass( this.name + '-mode-' + this.settings.hideMode + '-in' ).addClass( this.name + '-mode-' + this.settings.hideMode + '-in' );
-        return this;
-    };
-    FancyScroll.api.enable           = function () {
-        var SELF      = this;
-        SELF.disabled = false;
-        // enable me and removy my display style
-        SELF.y.css( 'display', '' );
-        SELF.x.css( 'display', '' );
-        return SELF;
-    };
-    FancyScroll.api.resize           = function () {
-        var SELF = this;
-        // other behaviour for body
-        // get WayToScroll
-        if ( SELF.isBody ) {
-            SELF.element.wtsY = SELF.element [ 0 ].scrollHeight - window.innerHeight;
-        } else {
-            SELF.element.wtsY = SELF.element [ 0 ].scrollHeight - SELF.element.outerHeight();
-        }
-        // other behaviour for body
-        // get WayToScroll
-        if ( SELF.isBody ) {
-            SELF.element.wtsX = SELF.element [ 0 ].scrollWidth - window.innerWidth;
-        } else {
-            SELF.element.wtsX = SELF.element [ 0 ].scrollWidth - SELF.element.outerWidth();
-        }
+            this.x        = $( '<div/>', {
+                id   : this.name + '-x-' + this.id,
+                class: this.name + '-rail ' + this.name + '-x-rail'
+            } );
+            this.x.cursor = $( '<div/>', {
+                id   : this.name + '-x-cursor-' + this.id,
+                class: this.name + '-cursor'
+            } );
 
-        // style my rail
-        SELF.y.css( {
-            top   : SELF.element.position().top + parseInt( SELF.element.css( 'borderTop' ) || 0 ) + parseInt( SELF.element.css( 'marginTop' ) || 0 ),
-            height: SELF.isBody ? '100%' : SELF.element.innerHeight()
-        } );
-        SELF.x.css( {
-            left : SELF.element.position().left + parseInt( SELF.element.css( 'marginRight' ) ),
-            width: SELF.isBody ? '100%' : SELF.element.outerWidth()
-        } );
+            this.left = this.element.scrollLeft();
+            this.top  = this.element.scrollTop();
 
-        // style my cursor
-        SELF.y.cursor.css( {
-            height   : SELF.y.height() - ( SELF.y.height() * ( SELF.element.wtsY / SELF.element [ 0 ].scrollHeight ) ),
-            minHeight: SELF.settings.cursorMinHeight
-        } );
-        SELF.x.cursor.css( {
-            width   : SELF.element.outerWidth() - ( SELF.element.outerWidth() * ( SELF.element.wtsX / SELF.element [ 0 ].scrollWidth ) ),
-            minWidht: SELF.settings.cursorMinHeight
-        } );
-
-        SELF.moveCursor();
-
-        // calculate WayToScroll for my rails
-        SELF.y.wts = SELF.y.height() - SELF.y.cursor.outerHeight();
-        SELF.x.wts = SELF.x.width() - SELF.x.cursor.outerWidth();
-
-        // calculate ratio
-        SELF.ratioY = SELF.element.wtsY / SELF.y.wts;
-        SELF.ratioX = SELF.element.wtsX / SELF.x.wts;
-
-        // hide rails if no ratio available
-        if ( SELF.ratioY < 1 ) {
-            SELF.y.css( 'display', 'none' );
-        } else {
-            SELF.y.css( 'display', '' );
-        }
-
-        if ( SELF.ratioX < 1 ) {
-            SELF.x.css( 'display', 'none' );
-        } else {
-            SELF.x.css( 'display', '' );
-        }
-
-        return SELF;
-    };
-    FancyScroll.api.destroy          = function () {
-        // remove class
-        this.element.removeClass( this.name + '-element' );
-        // reset overflow and unbind events
-        this.element.css( 'overflow', '' ).unbind( '.' + this.name );
-        $( window ).unbind( '.' + this.name );
-        // reset cursor
-        $( 'html' ).css( {
-            cursor: ''
-        } );
-        //re move rails
-        this.y.remove();
-        this.x.remove();
-    };
-    FancyScroll.api.addEventListener = function () {
-        var SELF  = this,
-            lastY = 0;
-
-        function doScroll( e ) {
-            if ( !SELF.disabled ) {
-
-                if ( SELF.settings.mobile ? true : !Fancy.mobile ) {
-                    var delta = 0;
-                    if ( !e ) {
-                        e = window.event;
-                    }
-                    if ( e.wheelDelta ) {
-                        delta = e.wheelDelta / 120;
-                    } else if ( e.detail ) {
-                        delta = -e.detail / 3;
-                    }
-                    var closest = $( e.target ).closest( '.' + SELF.name + '-element' ),
-                        up      = delta > 0;
-
-                    // if i am prevented and i am body and closest is not this element -> dont scroll
-                    if ( SELF.settings.preventDefault && ( closest.length && !closest.is( SELF.element ) ) ) {
-                        SELF.debug( 'has fancyscroll' );
-                        if ( up && closest.data( 'FancyScroll' ).infinite && closest.data( 'FancyScroll' ).infinite.last.up ) {
-                            SELF.debug( 'the ' + SELF.name + '-element has infiniteScroll, is currently on way up and is not on top yet' );
-                            return true;
-                        }
-                        if ( up && closest.scrollTop() ) {
-                            SELF.debug( 'the ' + SELF.name + '-element is currently on way up and is not on top yet' );
-                            return;
-                        } else if ( !up && closest.scrollTop() < closest [ 0 ].scrollHeight - closest.outerHeight() ) {
-                            SELF.debug( 'the ' + SELF.name + '-element is currently on way down and is not on bottom yet' );
-                            return true;
-                        }
-                    }
-
-                    // if i am prevented and closest scrollable element is not this.element and closest scrollable element is not document -> dont scroll
-                    /*if( SELF.settings.preventDefault && ( !scrollable.is( SELF.element ) && !scrollable.is( $( document ) ) ) ) {
-                        SELF.debug( 'scrollable parent' );
-                        if( up && scrollable.scrollTop() ) {
-                            SELF.debug( 'the container, the mouse is in, is currently on way up and didnt stop on top' );
-                            return;
-                        } else if( !up && scrollable.scrollTop() < scrollable [ 0 ].scrollHeight - scrollable.outerHeight() ) {
-                            SELF.debug( 'the container, the mouse is in, is currently on way down and didnt stop on bottom' );
-                            return true;
-                        }
-                    }*/
-                    if ( e.type == "touchmove" ) {
-                        // get mobile touch event
-                        var currentY = e.touches && e.touches [ 0 ].clientY;
-                        up           = currentY >= lastY;
-                        if ( up ) {
-                            if ( SELF.top ) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                e.stopImmediatePropagation();
-                                // SCROLLING UP
-                                SELF.scrollTo( SELF.left, SELF.top - ( currentY - lastY ) );
-                            }
-                        } else {
-                            if ( SELF.top < SELF.element[ 0 ].scrollHeight - SELF.element.outerHeight() ) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                e.stopImmediatePropagation();
-                                // SCROLLING DOWN
-                                SELF.scrollTo( SELF.left, SELF.top + ( lastY - currentY ) );
-                            }
-                        }
-                        lastY = currentY;
-                    } else {
-                        // get direction by wheelDelta or detail
-                        if ( up ) {
-                            if ( SELF.top ) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                e.stopImmediatePropagation();
-                                // SCROLLING UP
-                                SELF.scrollTo( SELF.left, SELF.top - SELF.settings.scrollValue * delta );
-                            }
-
-                        } else {
-                            if ( SELF.top < SELF.element[ 0 ].scrollHeight - SELF.element.outerHeight() ) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                e.stopImmediatePropagation();
-                                // SCROLLING DOWN
-                                SELF.scrollTo( SELF.left, SELF.top + SELF.settings.scrollValue * -delta );
-                            }
-                        }
-                    }
-                } else {
-                    SELF.scrollEvents();
-                }
+            // add classes and make unscrollable
+            this.element.addClass( this.name + '-element' );
+            if ( this.settings.mobile ? true : !Fancy.mobile ) {
+                this.element.css( {
+                    overflow: 'hidden'
+                } );
             } else {
-                e.preventDefault();
+                this.element.css( {
+                    overflow: 'auto'
+                } );
+            }
+            if ( this.settings.y && this.settings.mobile ? true : !Fancy.mobile ) {
+                this.y.append( this.y.cursor );
+                this.wrapper.append( this.y );
+            }
+            if ( this.settings.x && this.settings.mobile ? true : !Fancy.mobile ) {
+                // currently disabled due to uncomplete
+                // this.x.append( this.x.cursor );
+                // this.wrapper.append( this.x );
             }
 
+            this.y.cursor.css( {
+                background  : this.settings.cursorColor,
+                position    : 'relative',
+                right       : 0,
+                border      : ( this.settings.borderColor ? '1px solid ' + this.settings.borderColor : '' ),
+                borderRadius: this.settings.borderRadius,
+                cursor      : this.settings.cursorCursor
+            } ).addClass( this.name + '-theme-' + this.settings.theme + '-cursor' );
+
+            this.x.cursor.css( {
+                background  : this.settings.cursorColor,
+                position    : 'relative',
+                top         : 0,
+                border      : ( this.settings.borderColor ? '1px solid ' + this.settings.borderColor : '' ),
+                borderRadius: this.settings.borderRadius,
+                cursor      : this.settings.cursorCursor
+            } ).addClass( this.name + '-theme-' + this.settings.theme + '-cursor' );
+
+            this.y.css( {
+                position       : ( this.isBody ? 'fixed' : 'absolute' ),
+                backgroundColor: this.settings.railColor,
+                width          : this.settings.cursorWidth
+            } ).addClass( this.name + '-theme-' + this.settings.theme + '-rail' );
+            this.x.css( {
+                position       : ( this.isBody ? 'fixed' : 'absolute' ),
+                backgroundColor: this.settings.railColor,
+                width          : this.settings.cursorWidth
+            } ).addClass( this.name + '-theme-' + this.settings.theme + '-rail' );
         }
 
+        showCursor( rail ) {
 
-        SELF.element.on( 'mouseenter.' + SELF.name, function () {
-            if ( !SELF.disabled ) {
-                // add class hovered
-                SELF.y.addClass( 'hovered' );
-                SELF.showCursor();
-            }
-        } ).on( 'mouseleave.' + SELF.name, function () {
-            // remove class hovered
-            SELF.y.removeClass( 'hovered' );
-        } ).on( "touchstart", function ( e ) {
-            lastY = e.originalEvent.touches [ 0 ].clientY;
-        } );
+            // in case it is not disabled and there is a ratio AND if my rails is Y
+            if ( !this.disabled && this.ratioY > 1 && ( !rail || rail === 'y' ) ) {
 
-        SELF.element.on( 'DOMMouseScroll.' + this.name + ' mousewheel.' + this.name + ' MozMousePixelScroll.' + this.name + ' touchmove.' + this.name, function ( e ) {
-            doScroll( e.originalEvent );
-        } );
-        /** IE/Opera. */
-        SELF.element [ 0 ].onmousewheel = SELF.element [ 0 ].onmousewheel = doScroll;
+                this.y.removeClass( this.name + '-mode-' + this.settings.hideMode + '-out' ).addClass( this.name + '-mode-' + this.settings.hideMode + '-in' );
 
-        SELF.y.on( 'mouseenter.' + SELF.name, function () {
-            // add class hovered and stay
-            SELF.y.addClass( 'hovered' );
-            SELF.y.cursor.active = true;
-            SELF.showCursor();
-        } ).on( 'mouseleave.' + SELF.name, function () {
-            // remove class hovered
-            SELF.y.removeClass( 'hovered' );
-            SELF.y.cursor.active = false;
-        } );
+                // if i am allowed to hide, and i'm not holding the mouse over the rail and i'm not dragged, hide the cursor after 1 min
+                if ( this.settings.autoHide ) {
 
-        SELF.y.on( "click." + SELF.name, function ( e ) {
-            e.preventDefault();
-            e.stopPropagation();
-            // coming soon
-            if ( e.target == SELF.y[ 0 ] ) {
-                // (offset - half cursor) * 100 / height
-                SELF.scrollTo( SELF.left, (SELF.element[ 0 ].scrollHeight * Math.min( 100, Math.max( 0, (e.offsetY - SELF.y.cursor.height() / 2) * 100 / (SELF.y.height()) ) ) / 100) );
-            }
-        } );
-
-        // cursor grab event
-        SELF.y.cursor.on( 'mousedown.' + SELF.name, function ( e ) {
-            "use strict";
-            e.preventDefault();
-            e.stopPropagation();
-            mouse                 = {};
-            mouse.start           = e.clientY;
-            mouse.old             = e.clientY;
-            SELF.y.cursor.dragged = true;
-            SELF.y.cursor.active  = true;
-            $( 'html' ).css( {
-                cursor: SELF.settings.cursorCursor
-            } );
-
-            mouse.wts      = {};
-            mouse.wts.up   = mouse.start - parseInt( SELF.y.cursor.css( 'top' ) ) - 2;
-            mouse.wts.down = mouse.start + SELF.y.wts - parseInt( SELF.y.cursor.css( 'top' ) ) + 2;
-            // calculate ways and set cursor for all and prevent selection
-
-            $( document, 'body' ).on( 'selectstart.' + SELF.name, function ( event ) {
-                "use strict";
-                event.preventDefault();
-            } );
-        } );
-
-        $( window ).on( 'mousemove.' + SELF.name, function ( e ) {
-            "use strict";
-
-            // just if im dragged
-            if ( SELF.y.cursor.dragged ) {
-                var wts;
-                // other behaviour for !chrome and body
-                // calculate scroll
-                if ( SELF.isBody && !Fancy.isChrome ) {
-                    wts = SELF.wrapper.scrollTop() + ( ( SELF.element.wtsY / SELF.y.wts ) * ( e.clientY - mouse.old ) );
-                } else {
-                    wts = SELF.element.scrollTop() + ( ( SELF.element.wtsY / SELF.y.wts ) * ( e.clientY - mouse.old ) );
-                }
-                SELF.scrollTo( SELF.left, Math.round( wts ) );
-
-                // resize but dont reposition
-                SELF.resize();
-
-                // set old position for another calculation
-                if ( e.clientY >= mouse.wts.up && e.clientY <= mouse.wts.down ) {
-                    mouse.old = e.clientY;
+                    this.delay( () => {
+                        if ( !this.y.cursor.active && !this.y.cursor.dragged )
+                            this.hideCursor();
+                    }, 1000 );
                 }
             }
-        } );
 
-        $( window ).on( 'mouseup.' + SELF.name + ' touchend.' + SELF.name, function () {
-            "use strict";
-            // unbind selection
-            $( document ).unbind( 'selectstart.' + SELF.name );
+            // in case it is not disabled and there is a ratio AND if my rails is X
+            if ( !this.disabled && this.ratioX > 1 && ( !rail || rail === 'x' ) ) {
+
+                this.x.removeClass( this.name + '-mode-' + this.settings.hideMode + '-out' ).addClass( this.name + '-mode-' + this.settings.hideMode + '-in' );
+
+                // if i am allowed to hide, and i'm not holding the mouse over the rail and i'm not dragged, hide the cursor after 1 min
+                if ( this.settings.autoHide ) {
+
+                    this.delay( () => {
+                        if ( !this.x.cursor.active && !this.y.cursor.dragged )
+                            this.hideCursor();
+                    }, 1000 );
+                }
+            }
+            return this;
+        }
+
+        hideCursor() {
+
+            // check again if i am enabled
+            if ( !this.disabled ) {
+
+                // remove the animation classes (css)
+                this.y.removeClass( this.name + '-mode-' + this.settings.hideMode + '-in' ).addClass( this.name + '-mode-' + this.settings.hideMode + '-out' );
+                this.x.removeClass( this.name + '-mode-' + this.settings.hideMode + '-in' ).addClass( this.name + '-mode-' + this.settings.hideMode + '-out' );
+            }
+
+            return this;
+        }
+
+        disable() {
+
+            // hide me and disable me
+            this.hideCursor();
+            this.disabled = true;
+
+            // hide me complete to prevent visibility
+            this.y.hide().removeClass( this.name + '-mode-' + this.settings.hideMode + '-in' ).addClass( this.name + '-mode-' + this.settings.hideMode + '-in' );
+            this.x.hide().removeClass( this.name + '-mode-' + this.settings.hideMode + '-in' ).addClass( this.name + '-mode-' + this.settings.hideMode + '-in' );
+            return this;
+        }
+
+        enable() {
+
+            this.disabled = false;
+            // enable me and removy my display style
+            this.y.css( 'display', '' );
+            this.x.css( 'display', '' );
+            return this;
+        }
+
+        resize() {
+
+            // other behaviour for body
+            // get WayToScroll
+            if ( this.isBody )
+                this.element.wtsY = this.element [ 0 ].scrollHeight - window.innerHeight;
+            else
+                this.element.wtsY = this.element [ 0 ].scrollHeight - this.element.outerHeight();
+
+            // other behaviour for body
+            // get WayToScroll
+            if ( this.isBody )
+                this.element.wtsX = this.element [ 0 ].scrollWidth - window.innerWidth;
+            else
+                this.element.wtsX = this.element [ 0 ].scrollWidth - this.element.outerWidth();
+
+
+            // style my rail
+            this.y.css( {
+                top   : this.element.position().top + parseInt( this.element.css( 'borderTop' ) || 0 ) + parseInt( this.element.css( 'marginTop' ) || 0 ),
+                height: this.isBody ? '100%' : this.element.innerHeight()
+            } );
+            this.x.css( {
+                left : this.element.position().left + parseInt( this.element.css( 'marginRight' ) ),
+                width: this.isBody ? '100%' : this.element.outerWidth()
+            } );
+
+            // style my cursor
+            this.y.cursor.css( {
+                height   : this.y.height() - ( this.y.height() * ( this.element.wtsY / this.element [ 0 ].scrollHeight ) ),
+                minHeight: this.settings.cursorMinHeight
+            } );
+            this.x.cursor.css( {
+                width   : this.element.outerWidth() - ( this.element.outerWidth() * ( this.element.wtsX / this.element [ 0 ].scrollWidth ) ),
+                minWidht: this.settings.cursorMinHeight
+            } );
+
+            this.moveCursor();
+
+            // calculate WayToScroll for my rails
+            this.y.wts = this.y.height() - this.y.cursor.outerHeight();
+            this.x.wts = this.x.width() - this.x.cursor.outerWidth();
+
+            // calculate ratio
+            this.ratioY = this.element.wtsY / this.y.wts;
+            this.ratioX = this.element.wtsX / this.x.wts;
+
+            // hide rails if no ratio available
+            if ( this.ratioY < 1 )
+                this.y.css( 'display', 'none' );
+            else
+                this.y.css( 'display', '' );
+
+            if ( this.ratioX < 1 )
+                this.x.css( 'display', 'none' );
+            else
+                this.x.css( 'display', '' );
+
+            return this;
+        }
+
+        destroy() {
+
+            // remove class
+            this.element.removeClass( this.name + '-element' );
+            // reset overflow and unbind events
+            this.element.css( 'overflow', '' ).unbind( '.' + this.name );
+            $( window ).unbind( '.' + this.name );
             // reset cursor
             $( 'html' ).css( {
                 cursor: ''
             } );
-            // destroy mouse
-            mouse                 = {};
-            SELF.y.cursor.active  = false;
-            SELF.y.cursor.dragged = false;
-        } );
+            //re move rails
+            this.y.remove();
+            this.x.remove();
+        }
 
-        // create an observer instance
-        if ( MutationObserver ) {
-            var observer = new MutationObserver( function ( mutations ) {
-                mutations.forEach( function ( mutation ) {
-                    SELF.resize();
-                    SELF.position();
+        addEventListener() {
+
+            let lastY = 0;
+
+            this.element.on( 'mouseenter.' + this.name, () => {
+
+                if ( !this.disabled ) {
+
+                    // add class hovered
+                    this.y.addClass( 'hovered' );
+                    this.showCursor();
+                }
+            } ).on( 'mouseleave.' + this.name, () => {
+                // remove class hovered
+                this.y.removeClass( 'hovered' );
+            } ).on( "touchstart." + this.name, function ( e ) {
+                lastY = e.originalEvent.touches [ 0 ].clientY;
+            } );
+
+            const doScroll = ( e ) => {
+
+                if ( !this.disabled ) {
+
+                    if ( this.settings.mobile ? true : !Fancy.mobile ) {
+
+                        let delta = 0;
+                        if ( !e )
+                            e = window.event;
+                        else
+                            e = e.originalEvent;
+
+                        if ( e.wheelDelta )
+                            delta = e.wheelDelta / 120;
+                        else if ( e.detailX || e.detailY )
+                            delta = -( e.detailX || e.detailY ) / 3;
+
+                        let closest = $( e.target ).closest( '.' + this.name + '-element' ),
+                            up      = delta > 0;
+
+                        // if i am prevented and i am body and closest is not this element -> dont scroll
+                        if ( this.settings.preventDefault && ( closest.length && !closest.is( this.element ) ) ) {
+
+                            this.debug( 'has fancyscroll' );
+
+                            if ( up && closest.data( 'FancyScroll' ).infinite && closest.data( 'FancyScroll' ).infinite.last.up ) {
+
+                                this.debug( 'the ' + this.name + '-element has infiniteScroll, is currently on way up and is not on top yet' );
+                                return true;
+                            }
+
+                            if ( up && closest.scrollTop() ) {
+
+                                this.debug( 'the ' + this.name + '-element is currently on way up and is not on top yet' );
+                                return;
+
+                            } else if ( !up && closest.scrollTop() < closest [ 0 ].scrollHeight - closest.outerHeight() ) {
+
+                                this.debug( 'the ' + this.name + '-element is currently on way down and is not on bottom yet' );
+                                return true;
+                            }
+                        }
+
+                        // if i am prevented and closest scrollable element is not this.element and closest scrollable element is not document -> dont scroll
+                        /*if( this.settings.preventDefault && ( !scrollable.is( this.element ) && !scrollable.is( $( document ) ) ) ) {
+                            this.debug( 'scrollable parent' );
+                            if( up && scrollable.scrollTop() ) {
+                                this.debug( 'the container, the mouse is in, is currently on way up and didnt stop on top' );
+                                return;
+                            } else if( !up && scrollable.scrollTop() < scrollable [ 0 ].scrollHeight - scrollable.outerHeight() ) {
+                                this.debug( 'the container, the mouse is in, is currently on way down and didnt stop on bottom' );
+                                return true;
+                            }
+                        }*/
+                        if ( e.type === "touchmove" ) {
+
+                            // get mobile touch event
+                            let currentY = e.touches && e.touches [ 0 ].clientY;
+                            up           = currentY >= lastY;
+
+                            if ( up ) {
+
+                                if ( this.top ) {
+
+                                    e.stopPropagation();
+                                    e.stopImmediatePropagation();
+                                    // SCROLLING UP
+                                    this.scrollTo( this.left, this.top - ( currentY - lastY ) );
+                                }
+                            } else {
+
+                                if ( this.top < this.element[ 0 ].scrollHeight - this.element.outerHeight() ) {
+
+                                    e.stopPropagation();
+                                    e.stopImmediatePropagation();
+                                    // SCROLLING DOWN
+                                    this.scrollTo( this.left, this.top + ( lastY - currentY ) );
+                                }
+                            }
+
+                            lastY = currentY;
+
+                        } else {
+                            // get direction by wheelDelta or detail
+                            if ( up ) {
+
+                                if ( this.top ) {
+
+                                    e.stopPropagation();
+                                    e.stopImmediatePropagation();
+                                    // SCROLLING UP
+                                    this.scrollTo( this.left, this.top - this.settings.scrollValue * delta );
+                                }
+                            } else {
+
+                                if ( this.top < this.element[ 0 ].scrollHeight - this.element.outerHeight() ) {
+
+                                    e.stopPropagation();
+                                    e.stopImmediatePropagation();
+                                    // SCROLLING DOWN
+                                    this.scrollTo( this.left, this.top + this.settings.scrollValue * -delta );
+                                }
+                            }
+                        }
+                    } else {
+                        this.scrollEvents();
+                    }
+                } else {
+                    e.preventDefault();
+                }
+            };
+
+            this.element.on( 'DOMMouseScroll.' + this.name + ' mousewheel.' + this.name + ' MozMousePixelScroll.' + this.name + ' touchmove.' + this.name, doScroll );
+            /** IE/Opera. */
+            this.element [ 0 ].onmousewheel = this.element [ 0 ].onmousewheel = doScroll;
+
+            this.y.on( 'mouseenter.' + this.name, () => {
+
+                // add class hovered and stay
+                this.y.addClass( 'hovered' );
+                this.y.cursor.active = true;
+                this.showCursor();
+
+            } ).on( 'mouseleave.' + this.name, () => {
+
+                // remove class hovered
+                this.y.removeClass( 'hovered' );
+                this.y.cursor.active = false;
+            } );
+
+            this.y.on( "click." + this.name, ( e ) => {
+
+                e.preventDefault();
+                e.stopPropagation();
+                // coming soon
+                if ( e.target === this.y[ 0 ] ) {
+                    // (offset - half cursor) * 100 / height
+                    this.scrollTo( this.left, ( this.element[ 0 ].scrollHeight * Math.min( 100, Math.max( 0, ( e.offsetY - this.y.cursor.height() / 2 ) * 100 / ( this.y.height() ) ) ) / 100 ) );
+                }
+            } );
+
+            // cursor grab event
+            this.y.cursor.on( 'mousedown.' + this.name, ( e ) => {
+
+                e.preventDefault();
+                e.stopPropagation();
+                mouse                 = {};
+                mouse.start           = e.clientY;
+                mouse.old             = e.clientY;
+                this.y.cursor.dragged = true;
+                this.y.cursor.active  = true;
+                $( 'html' ).css( {
+                    cursor: this.settings.cursorCursor
+                } );
+
+                mouse.wts      = {};
+                mouse.wts.up   = mouse.start - parseInt( this.y.cursor.css( 'top' ) ) - 2;
+                mouse.wts.down = mouse.start + this.y.wts - parseInt( this.y.cursor.css( 'top' ) ) + 2;
+                // calculate ways and set cursor for all and prevent selection
+
+                $( document, 'body' ).on( 'selectstart.' + this.name, function ( event ) {
+                    "use strict";
+                    event.preventDefault();
                 } );
             } );
 
-            // pass in the target node, as well as the observer options
-            observer.observe( SELF.element [ 0 ], {
-                subtree          : false,
-                attributeOldValue: false,
-                attributes       : true,
-                childList        : true,
-                characterData    : true
+            $( window ).on( 'mousemove.' + this.name, ( e ) => {
+
+
+                // just if im dragged
+                if ( this.y.cursor.dragged ) {
+
+                    let wts;
+                    // other behaviour for !chrome and body
+                    // calculate scroll
+                    if ( this.isBody && !Fancy.isChrome )
+                        wts = this.wrapper.scrollTop() + ( ( this.element.wtsY / this.y.wts ) * ( e.clientY - mouse.old ) );
+                    else
+                        wts = this.element.scrollTop() + ( ( this.element.wtsY / this.y.wts ) * ( e.clientY - mouse.old ) );
+
+                    this.scrollTo( this.left, Math.round( wts ) );
+
+                    // resize but dont reposition
+                    this.resize();
+
+                    // set old position for another calculation
+                    if ( e.clientY >= mouse.wts.up && e.clientY <= mouse.wts.down ) {
+                        mouse.old = e.clientY;
+                    }
+                }
+            } );
+
+            $( window ).on( 'mouseup.' + this.name + ' touchend.' + this.name, () => {
+
+                // unbind selection
+                $( document ).unbind( 'selectstart.' + this.name );
+                // reset cursor
+                $( 'html' ).css( {
+                    cursor: ''
+                } );
+                // destroy mouse
+                mouse                 = {};
+                this.y.cursor.active  = false;
+                this.y.cursor.dragged = false;
+            } );
+
+            // create an observer instance
+            if ( MutationObserver ) {
+
+                const observer = new MutationObserver( ( mutations ) => {
+
+                    mutations.forEach( ( mutation ) => {
+
+                        this.resize();
+                        this.position();
+                    } );
+                } );
+
+                // pass in the target node, as well as the observer options
+                observer.observe( this.element [ 0 ], {
+                    subtree          : false,
+                    attributeOldValue: false,
+                    attributes       : true,
+                    childList        : true,
+                    characterData    : true
+                } );
+            }
+
+            this.element.on( 'DOMAttrModified', ( e ) => {
+
+                if ( e.attrName === 'style' ) {
+
+                    this.resize();
+                    this.position();
+                }
             } );
         }
 
-        SELF.element.on( 'DOMAttrModified', function ( e ) {
-            if ( e.attrName === 'style' ) {
-                SELF.resize();
-                SELF.position();
-            }
-        } );
-    };
-    FancyScroll.api.position         = function () {
-        this.y.css( {
-            left: this.element.position().left - this.settings.margin + this.element.outerWidth() - this.y.width() - parseInt( this.element.css( 'borderRight' ) || 0 ) + parseInt( this.element.css( 'marginLeft' ) )
-        } );
-        this.x.css( {
-            top: this.element.position().top - this.settings.margin + this.element.outerHeight() - this.x.height() + parseInt( this.element.css( 'marginTop' ) )
-        } );
-        return this;
-    };
-    /**
-     * scrolling to x-position
-     * @param {Number} [x]
-     * @param {Number} [y]
-     * @returns {FancyScroll.api}
-     */
-    FancyScroll.api.scrollTo = function ( x, y ) {
-        var SELF = this;
-        if ( x < 0 ) {
-            x = 0;
-        }
-        if ( y < 0 ) {
-            y = 0;
-        }
-        if ( x > SELF.element.wtsX ) {
-            x = SELF.element.wtsX;
-        }
-        if ( y > SELF.element.wtsY ) {
-            y = SELF.element.wtsY;
+        position() {
+
+            this.y.css( {
+                left: this.element.position().left - this.settings.margin + this.element.outerWidth() - this.y.width() - parseInt( this.element.css( 'borderRight' ) || 0 ) + parseInt( this.element.css( 'marginLeft' ) )
+            } );
+
+            this.x.css( {
+                top: this.element.position().top - this.settings.margin + this.element.outerHeight() - this.x.height() + parseInt( this.element.css( 'marginTop' ) )
+            } );
+
+            return this;
         }
 
-        // define scrollDirection to see where it goes
-        if ( x > SELF.left ) {
-            SELF.direction.x = 'right';
-        } else if ( x < SELF.left ) {
-            SELF.direction.x = 'left';
-        } else {
-            SELF.direction.x = false;
-        }
+        /**
+         * scrolling to x-position
+         * @param {Number} [x]
+         * @param {Number} [y]
+         * @returns {FancyScroll}
+         */
+        scrollTo( x, y ) {
 
-        if ( y > SELF.top ) {
-            SELF.direction.y = 'down';
-        } else if ( y < SELF.top ) {
-            SELF.direction.y = 'up';
-        } else {
-            SELF.direction.y = false;
-        }
-        function scrollLeft( type ) {
-            SELF [ type ].scrollLeft( x );
-            SELF.left = x;
-            // fire scrollevents
-            if ( SELF.direction.x ) {
-                SELF.scrollEvents();
-            }
-        }
+            if ( x < 0 )
+                x = 0;
 
-        function scrollTop( type ) {
-            if ( SELF.settings.smooth ) {
-                var speed = SELF.settings.scrollValue / SELF[ type ][ 0 ].scrollHeight * 10000;
-                SELF[ type ].stop( true ).animate( { scrollTop: y }, speed, function () {
+            if ( y < 0 )
+                y = 0;
+
+            if ( x > this.element.wtsX )
+                x = this.element.wtsX;
+
+            if ( y > this.element.wtsY )
+                y = this.element.wtsY;
+
+            // define scrollDirection to see where it goes
+            if ( x > this.left )
+                this.direction.x = 'right';
+            else if ( x < this.left )
+                this.direction.x = 'left';
+            else
+                this.direction.x = false;
+
+            if ( y > this.top )
+                this.direction.y = 'down';
+            else if ( y < this.top )
+                this.direction.y = 'up';
+            else
+                this.direction.y = false;
+
+            this.showCursor();
+            if ( this.settings.smooth ) {
+
+                const speed = this.settings.scrollValue / this[ type ][ 0 ].scrollHeight * 10000;
+                this.element.stop( true ).animate( { scrollTop: y }, speed, () => {
+
                     // move cursor
-                    SELF.moveCursor();
+                    this.moveCursor();
                     // resize the scroller
-                    SELF.resize();
+                    this.resize();
                     // and show the cursor
-                    SELF.showCursor();
+                    this.showCursor();
                     // fire scrollevents
-                    if ( SELF.direction.y ) {
-                        SELF.scrollEvents();
-                    }
+                    if ( this.direction.y )
+                        this.scrollEvents();
                 } );
             } else {
-                SELF [ type ].scrollTop( y );
+
+                this.element.scrollTop( y );
                 // move cursor
-                SELF.moveCursor();
+                this.moveCursor();
                 // fire scrollevents
-                if ( SELF.direction.y ) {
-                    SELF.scrollEvents();
-                }
+                if ( this.direction.y )
+                    this.scrollEvents();
             }
-            SELF.top = y;
+
+            this.top = y;
+
+
+            this.element.scrollLeft( x );
+            this.left = x;
+            // fire scrollevents
+            if ( this.direction.x )
+                this.scrollEvents();
+
+            return this;
         }
 
-        scrollTop( 'element' );
-        scrollLeft( 'element' );
-        return SELF;
-    };
-    FancyScroll.api.moveCursor   = function () {
-        var SELF = this;
+        moveCursor() {
 
-        function move( type ) {
-
-            var rx = ( SELF.y.height() - SELF.y.cursor.outerWidth() ) / SELF.element.wtsX,
-                ry = ( SELF.y.height() - SELF.y.cursor.outerHeight() ) / SELF.element.wtsY;
+            const rx = ( this.y.height() - this.y.cursor.outerWidth() ) / this.element.wtsX,
+                  ry = ( this.y.height() - this.y.cursor.outerHeight() ) / this.element.wtsY;
 
             // stop cursor and reposition
-            SELF.y.cursor.css( {
-                top: SELF[ type ].scrollTop() * ry
+            this.y.cursor.css( {
+                top: this.element.scrollTop() * ry
             } );
             // stop cursor and reposition
-            SELF.x.cursor.css( {
-                left: SELF[ type ].scrollLeft() * rx
+            this.x.cursor.css( {
+                left: this.element.scrollLeft() * rx
             } );
+
+            return this;
         }
 
-        move( 'element' );
-        return SELF;
-    };
-    FancyScroll.api.delay        = function ( callback, ms ) {
-        var SELF = this;
-        clearTimeout( timer );
-        timer = setTimeout( function () {
-            callback.call( SELF );
-        }, ms );
-    };
-    FancyScroll.api.timeout      = function ( callback, ms ) {
-        var SELF = this;
-        setTimeout( function () {
-            callback.call( SELF );
-        }, ms );
-    };
-    FancyScroll.api.scrollEvents = function () {
-        var SELF = this;
-        // function to trigger
-        function triggerEvent( type ) {
-            var event = $.Event( {
-                type       : SELF.name + ':' + type,
-                FancyScroll: SELF,
-                y          : SELF.y,
-                x          : SELF.x
-            } );
-            SELF.element.trigger( event );
+        delay( callback, ms ) {
+
+            clearTimeout( timer );
+            timer = setTimeout( () => callback.call( this ), ms );
         }
 
-        // if option is in percent
-        // check if i reached this position
-        // and trigger the event for it
-        if ( SELF.settings.beforeTop.toString().indexOf( '%' ) > 0 ) {
-            if ( SELF.element.scrollTop() * 100 / SELF.element.wtsY <= parseInt( SELF.settings.beforeTop ) && SELF.direction.y == "up" ) {
-                triggerEvent( 'top' );
+        scrollEvents() {
+
+            // if option is in percent
+            // check if i reached this position
+            // and trigger the event for it
+            if ( this.settings.beforeTop.toString().indexOf( '%' ) > 0 ) {
+
+                if ( this.element.scrollTop() * 100 / this.element.wtsY <= parseInt( this.settings.beforeTop ) && this.direction.y === "up" )
+                    this._triggerEvent( 'top' );
+
+            } else {
+
+                if ( this.element.scrollTop() <= this.settings.beforeTop && this.direction.y === "up" )
+                    this._triggerEvent( 'top' );
             }
-        } else {
-            if ( SELF.element.scrollTop() <= SELF.settings.beforeTop && SELF.direction.y == "up" ) {
-                triggerEvent( 'top' );
+
+            if ( this.settings.beforeBottom.toString().indexOf( '%' ) > 0 ) {
+
+                if ( this.element.scrollTop() * 100 / this.element.wtsY >= 100 - parseInt( this.settings.beforeBottom ) && this.direction.y === "down" )
+                    this._triggerEvent( 'bottom' );
+
+            } else {
+
+                if ( this.element.scrollTop() >= this.element.wtsY - this.settings.beforeBottom && this.direction.y === "down" )
+                    this._triggerEvent( 'bottom' );
             }
+            // trigger scroll event and direction event
+            this.element.trigger( this.name + ':scroll' );
+            this.element.trigger( this.name + ':' + this.scrollDirection );
         }
-        if ( SELF.settings.beforeBottom.toString().indexOf( '%' ) > 0 ) {
-            if ( SELF.element.scrollTop() * 100 / SELF.element.wtsY >= 100 - parseInt( SELF.settings.beforeBottom ) && SELF.direction.y == "down" ) {
-                triggerEvent( 'bottom' );
-            }
-        } else {
-            if ( SELF.element.scrollTop() >= SELF.element.wtsY - SELF.settings.beforeBottom && SELF.direction.y == "down" ) {
-                triggerEvent( 'bottom' );
-            }
+
+        _triggerEvent( type ) {
+
+            const event = $.Event( {
+                type       : this.name + ':' + type,
+                FancyScroll: this,
+                y          : this.y,
+                x          : this.x
+            } );
+
+            this.element.trigger( event );
+        };
+
+        debug() {
+
+            if ( this.settings.debug )
+                console.log( arguments );
         }
-        // trigger scroll event and direction event
-        SELF.element.trigger( SELF.name + ':scroll' );
-        SELF.element.trigger( SELF.name + ':' + SELF.scrollDirection );
-    };
-    FancyScroll.api.debug        = function () {
-        if ( this.settings.debug ) {
-            console.log( arguments );
-        }
-    };
+    }
 
     Fancy.settings [ NAME ] = {
         scrollValue    : 100, // how many pixel to scroll?
@@ -678,9 +712,7 @@
     };
     Fancy.scroll            = VERSION;
     Fancy.api.scroll        = function ( settings ) {
-        return this.set( NAME, function ( el ) {
-            return new FancyScroll( el, settings );
-        } );
+        return this.set( NAME, ( el ) => new FancyScroll( el, settings ) );
     };
 
-})( jQuery );
+} )( jQuery );
